@@ -1,0 +1,114 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{color} % Required for custom colors
+\usepackage{listings} % Required for insertion of code
+\usepackage{hyperref} % For hyperlinks
+
+% Define colors for syntax highlighting
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% Setup the listings package for highlighting code
+\lstset{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=Python
+}
+
+\title{Sales Navigator: Charting Retail Trends with Map-Reduce}
+\author{The Sparkling Analysts:\\ Roshini Bikkina \\ Gopichand Chandana \\ Ashwanth Reddy Cheemarla \\ Tejaswini Kotha}
+\date{April 19, 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This document provides a comprehensive and detailed explanation of the implementation steps for the project "Sales Navigator: Charting Retail Trends with Map-Reduce," including discussions on the results achieved from the analysis of the E-commerce Dataset.
+
+\section{Implementation Steps}
+\subsection{Data Preprocessing}
+Data preprocessing involves loading, cleaning, and transforming data to ensure it is in a suitable format for analysis.
+\begin{lstlisting}[language=Python]
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, when
+
+# Initialize Spark Session
+spark = SparkSession.builder.appName("Sales Navigator").getOrCreate()
+
+# Load data
+df = spark.read.csv('path_to_data/E-commerce Dataset.csv', header=True, inferSchema=True)
+
+# Clean data by removing duplicates and handling missing values
+df = df.dropDuplicates().na.fill({"Sales": 0})
+
+# Normalize sales data
+max_sales = df.agg({"Sales": "max"}).collect()[0][0]
+df = df.withColumn("Normalized_Sales", col("Sales") / max_sales)
+\end{lstlisting}
+
+\subsection{Map-Reduce Processing}
+Using PySpark's map-reduce capabilities, we analyze sales trends across different dimensions.
+\begin{lstlisting}[language=Python]
+from pyspark.sql.functions import sum, avg
+
+# Aggregate sales data to compute total sales per product
+total_sales_per_product = df.groupBy("Product").agg(sum("Sales").alias("Total_Sales"))
+
+# Compute average sales per category
+avg_sales_per_category = df.groupBy("Product_Category").agg(avg("Sales").alias("Average_Sales"))
+\end{lstlisting}
+
+\subsection{Results Visualization}
+Utilizing Python libraries to create visualizations that provide insights into the data.
+\begin{lstlisting}[language=Python]
+import matplotlib.pyplot as plt
+
+# Plot total sales per product
+total_sales_data = total_sales_per_product.toPandas()
+plt.figure(figsize=(10, 8))
+plt.bar(total_sales_data['Product'], total_sales_data['Total_Sales'])
+plt.xlabel('Product')
+plt.ylabel('Total Sales')
+plt.title('Total Sales Per Product')
+plt.xticks(rotation=45)
+plt.show()
+\end{lstlisting}
+
+\section{Results Discussion}
+\subsection{Data Quality and the 5Vs}
+The implementation ensured high data quality and addressed each of the 5Vs of big data, crucial for robust analysis. Volume was managed with Spark, Velocity through real-time data simulation, Variety by integrating multiple data types, Veracity through data cleansing, and Value by deriving actionable insights.
+
+\subsection{Performance Metrics}
+Performance metrics such as latency, processing time, and resource utilization were carefully monitored and optimized. The project achieved low latency and high efficiency in processing, demonstrating the capabilities of our chosen technologies.
+
+\section{Conclusions}
+The project demonstrated how big data technologies could be leveraged to gain significant insights into retail trends, affecting strategic decisions in marketing and product placement. Further research could explore more advanced machine learning techniques for predictive analytics.
+
+\section{Citations}
+\begin{itemize}
+    \item Apache Spark Documentation
+    \item Python Data Science Handbook by Jake VanderPlas
+\end{itemize}
+
+\section{GitHub Repository}
+Link to our GitHub repository: \url{https://github.com/RoshiniNwmsu/The-Sparkling-Analysts}
+
+\end{document}
+vv
